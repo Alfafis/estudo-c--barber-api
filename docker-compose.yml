@@ -1,0 +1,37 @@
+services:
+  api:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    ports:
+      - '5000:8080'
+    volumes:
+      - ./src:/src
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=barber_db;Username=admin;Password=password123
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: barber_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: barber_db
+      TZ: America/Sao_Paulo
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db_initialize.db:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U admin -d barber_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
