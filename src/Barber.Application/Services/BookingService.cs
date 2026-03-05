@@ -1,19 +1,34 @@
 using Barber.Domain.Entities;
 using Barber.Domain.Repositories;
 using Barber.Application.DTOs;
+using Barber.Application.Messaging;
 using Barber.Infrastructure.Context;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Barber.Application.Services;
 
 public class BookingService
 {
+    private const string DefaultBookingQueue = "booking-events";
     private readonly IAppointmentRepository _repo;
     private readonly BarberDbContext _context;
+    private readonly IEventPublisher _eventPublisher;
+    private readonly ILogger<BookingService> _logger;
+    private readonly string _queueName;
 
-    public BookingService(IAppointmentRepository repo, BarberDbContext context)
+    public BookingService(
+        IAppointmentRepository repo,
+        BarberDbContext context,
+        IEventPublisher eventPublisher,
+        ILogger<BookingService> logger,
+        IConfiguration configuration)
     {
         _repo = repo;
         _context = context;
+        _eventPublisher = eventPublisher;
+        _logger = logger;
+        _queueName = configuration["RabbitMq:BookingQueue"] ?? DefaultBookingQueue;
     }
 
     public async Task<object> BookServiceAsync(CreateAppointmentRequest request)
@@ -38,6 +53,19 @@ public class BookingService
         await _repo.AddAsync(order);
         await _repo.SaveChangesAsync();
 
+        await TryPublishEventAsync(new
+        {
+            EventType = "booking.created",
+            OrderId = order.Id,
+            order.ClientId,
+            order.BarberId,
+            order.ServiceId,
+            order.StartTime,
+            order.EndTime,
+            order.TotalAmount,
+            OccurredAt = DateTimeOffset.UtcNow
+        });
+
         return new
         {
             OrderId = order.Id,
@@ -56,6 +84,32 @@ public class BookingService
 
         order.UpdateStatus("cancelled"); 
         await _context.SaveChangesAsync();
+
+        await TryPublishEventAsync(new
+        {
+            EventType = "booking.cancelled",
+            OrderId = order.Id,
+            order.ClientId,
+            order.BarberId,
+            order.ServiceId,
+            order.StartTime,
+            order.EndTime,
+            order.TotalAmount,
+            OccurredAt = DateTimeOffset.UtcNow
+        });
+
         return new { Message = "Agendamento cancelado com sucesso." };
+    }
+
+    private async Task TryPublishEventAsync(object message)
+    {
+        try
+        {
+            await _eventPublisher.PublishAsync(_queueName, message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Falha ao publicar evento de agendamento no RabbitMQ.");
+        }
     }
 }

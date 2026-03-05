@@ -1,6 +1,8 @@
 using Barber.Infrastructure.Context;
+using Barber.Application.Messaging;
 using Barber.Domain.Repositories;
 using Barber.Infrastructure.Repositories;
+using Barber.Infrastructure.Messaging;
 using Barber.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using Barber.Api.Endpoints;
@@ -22,6 +24,7 @@ builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<IBarberRepository, BarberRepository>();
 builder.Services.AddScoped<BarberService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

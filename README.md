@@ -77,6 +77,8 @@ Serviços expostos:
 - API: `http://localhost:5000`
 - Swagger: `http://localhost:5000/swagger`
 - PostgreSQL: `localhost:5432`
+- RabbitMQ (broker): `localhost:5672`
+- RabbitMQ UI: `http://localhost:15672` (guest/guest)
 
 Parar o ambiente:
 
@@ -236,6 +238,7 @@ dotnet run --project src/Barber.Api.csproj
 - O script SQL inicial está apontado diretamente para `db_initialize.db` no compose.
 - A pasta `init.sql/` existe no repositório, mas o compose atual utiliza `db_initialize.db`.
 - Senhas estão em texto simples por ser ambiente de estudo/desenvolvimento.
+- Ao criar/cancelar agendamento, a API publica eventos na fila `booking-events` do RabbitMQ.
 
 ## Melhorias sugeridas (próximos passos)
 

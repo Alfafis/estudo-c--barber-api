@@ -10,9 +10,16 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=barber_db;Username=admin;Password=password123
+      - RabbitMq__HostName=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__UserName=guest
+      - RabbitMq__Password=guest
+      - RabbitMq__BookingQueue=booking-events
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
 
   db:
     image: postgres:16-alpine
@@ -32,6 +39,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: barber-rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
 
 volumes:
   postgres_data:

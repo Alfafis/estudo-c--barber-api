@@ -60,3 +60,4 @@
 /src/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /src/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll
 /src/obj/Debug/net8.0/Barber.Api.MvcApplicationPartsAssemblyInfo.cs
+/src/bin/Debug/net8.0/RabbitMQ.Client.dll
