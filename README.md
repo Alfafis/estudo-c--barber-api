@@ -155,6 +155,33 @@ Usuário cliente:
 
 - `GET /dashboard/daily`
 
+### Listagens paginadas
+
+- `GET /shops?page=1&pageSize=10`
+- `GET /users?page=1&pageSize=10`
+- `GET /barbers?page=1&pageSize=10`
+- `GET /clients?page=1&pageSize=10`
+- `GET /services?page=1&pageSize=10`
+- `GET /appointments?page=1&pageSize=10`
+- `GET /orders?page=1&pageSize=10`
+- `GET /transactions?page=1&pageSize=10`
+
+Formato de retorno:
+
+```json
+{
+  "data": [],
+  "meta": {
+    "currentPage": 1,
+    "pageSize": 10,
+    "totalItems": 150,
+    "totalPages": 15,
+    "hasNext": true,
+    "hasPrevious": false
+  }
+}
+```
+
 ## Exemplos de requisição
 
 ### Login
