@@ -25,6 +25,7 @@ builder.Services.AddScoped<IBarberRepository, BarberRepository>();
 builder.Services.AddScoped<BarberService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddSingleton<IEventPublisher, RabbitMqEventPublisher>();
+builder.Services.AddHostedService<BookingEventsConsumer>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
